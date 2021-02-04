@@ -1,20 +1,30 @@
+const mongoose = require('mongoose')
 const express = require('express')
 const Joi = require('joi')
 
-const data = require('../data')
-
 const router = express.Router()
 
-router.get('/', (request, response) => {
-  
-  return response.send(data)
+const genreSchema = new mongoose.Schema({
+  name: { 
+    type: String,
+    required: true
+  }
 })
 
-router.get('/:id', (request, response) => {
-  const findGenre = data.find(genre => genre.id === parseInt(request.params.id))
- 
-  if(!findGenre) return response.status(404).send('Genre not found!')
+const Genre = new mongoose.model('Genre', genreSchema)
 
+router.get('/', async (request, response) => {
+  
+  const genres = await Genre.find()
+
+  return response.send(genres)
+})
+
+router.get('/:id', async (request, response) => {
+  const findGenre = await Genre.findById(request.params.id)
+  
+  if(!findGenre) return response.status(404).send('Genre not found!')
+  
   return response.send(findGenre)
 })
 
@@ -24,14 +34,11 @@ router.post('/', async (request, response) => {
     name: Joi.string().min(3).required()
   })
 
-  const newGenre = {
-    id: data.length + 1,
-    name: request.body.name
-  }
+  const newGenre = new Genre({ name: request.body.name })
 
   try {
     await schema.validateAsync(request.body);
-    data.push(newGenre)
+    await newGenre.save()
     response.send(newGenre)
     
   }
@@ -41,37 +48,32 @@ router.post('/', async (request, response) => {
 
 })
 
-router.put('/:id', async (request, response) => {
-  const findGenre = data.find(genre => genre.id === parseInt(request.params.id))
- 
-  if(!findGenre) return response.send('Genre not found!')
-
+router.put('/:id', async (request, response) => {  
   const schema = Joi.object({
     name: Joi.string().min(3).required()
   })
 
-  
+  const updatedGenre = await Genre.findByIdAndUpdate(request.params.id,
+    { $set: { name: request.body.name }},
+    { new: true })
+
+  if(!updatedGenre) return response.send('Genre not found!')
+
   try {
     await schema.validateAsync(request.body);
-    findGenre.name = request.body.name
-    return response.send(findGenre)
-    
+    return response.send(updatedGenre)
   }
   catch (error) { 
     response.status(400).send(error.details[0].message)
   }
 })
 
-router.delete('/:id', (request, response) => {
-  const findGenre = data.find(genre => genre.id === parseInt(request.params.id))
- 
-  if(!findGenre) return response.send('Genre not found!')
+router.delete('/:id', async (request, response) => {  
+  const removedGenre = await Genre.findByIdAndRemove(request.params.id)
 
-  const index = data.indexOf(findGenre)
-  data.splice(index, 1)
+  if(!removedGenre) return response.send('Genre not found!')
 
   return response.send('Genre deleted successfully!')
 })
-
 
 module.exports = router
