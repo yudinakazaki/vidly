@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const express = require('express')
-const genres = require('./routes/genres')
-const home = require('./routes/home')
-const customers = require('./routes/customers')
+const genres = require('./routes/genres.routes')
+const home = require('./routes/home.routes')
+const customers = require('./routes/customers.routes')
 
 mongoose.connect('mongodb://localhost/vidly')
   .then(() => console.log('Connected'))

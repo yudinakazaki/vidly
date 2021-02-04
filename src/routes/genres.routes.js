@@ -1,17 +1,7 @@
-const mongoose = require('mongoose')
 const express = require('express')
-const Joi = require('joi')
+const { Genre, validateGenre } = require('../models/genres')
 
 const router = express.Router()
-
-const genreSchema = new mongoose.Schema({
-  name: { 
-    type: String,
-    required: true
-  }
-})
-
-const Genre = new mongoose.model('Genre', genreSchema)
 
 router.get('/', async (request, response) => {
   
@@ -30,28 +20,21 @@ router.get('/:id', async (request, response) => {
 
 router.post('/', async (request, response) => {
   
-  const schema = Joi.object({
-    name: Joi.string().min(3).required()
-  })
+  const { error } = validateGenre(request.body)
+
+  if(error) return response.status(400).send(error.details[0].message)
 
   const newGenre = new Genre({ name: request.body.name })
 
-  try {
-    await schema.validateAsync(request.body);
-    await newGenre.save()
-    response.send(newGenre)
-    
-  }
-  catch (error) { 
-    response.status(400).send(error.details[0].message)
-  }
+  await newGenre.save()
 
+  response.send(newGenre)
 })
 
 router.put('/:id', async (request, response) => {  
-  const schema = Joi.object({
-    name: Joi.string().min(3).required()
-  })
+  const { error } = validateGenre(request.body)
+
+  if(error) return response.status(400).send(error.details[0].message)
 
   const updatedGenre = await Genre.findByIdAndUpdate(request.params.id,
     { $set: { name: request.body.name }},
@@ -59,13 +42,7 @@ router.put('/:id', async (request, response) => {
 
   if(!updatedGenre) return response.send('Genre not found!')
 
-  try {
-    await schema.validateAsync(request.body);
-    return response.send(updatedGenre)
-  }
-  catch (error) { 
-    response.status(400).send(error.details[0].message)
-  }
+  return response.send(updatedGenre)
 })
 
 router.delete('/:id', async (request, response) => {  
