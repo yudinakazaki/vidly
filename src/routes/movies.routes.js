@@ -22,7 +22,6 @@ router.post('/', async (request, response) => {
   if(error) return response.status(400).send(error.details[0].message)
 
   const genre = await Genre.findById(request.body.genreId)
-  if (!genre) return response.status(404).send('Invalid genre!')
   
   const newMovie = new Movie({
     title: request.body.title,
@@ -44,7 +43,6 @@ router.put('/:id', async (request, response) => {
   if(error) return response.status(400).send(error.details[0].message)
 
   const genre = await Genre.findById(request.body.genreId)
-  if(!genre) return response.status(400).send('Genre invalid')
 
   const updatedMovie = await Movie.findByIdAndUpdate(request.params.id, {
     $set: {

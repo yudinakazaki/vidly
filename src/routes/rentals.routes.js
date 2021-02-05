@@ -23,10 +23,7 @@ router.post('/', async (request, response) => {
   if(error) return response.status(400).send(error.details[0].message)
 
   const movie = await Movie.findById(request.body.movieId)
-  if(!movie) return response.status(400).send('Movie invalid!')
-
   const customer = await Customer.findById(request.body.customerId)
-  if(!customer) return response.status(400).send('Customer invalid!')
 
   const newRental = new Rental({
     customer: {
@@ -54,11 +51,8 @@ router.put('/:id', async (request, response) => {
   const { error } = validateRental(request.body)
   if(error) return response.status(400).send(error.details[0].message)
 
-  const movie = Movie.findById(request.body.movieId)
-  if(!movie) return response.status(400).send('Movie invalid!')
-
-  const customer = Customer.findById(request.body.customerId)
-  if(!customer) return response.status(400).send('Customer invalid')
+  const movie = await Movie.findById(request.body.movieId)
+  const customer = await Customer.findById(request.body.customerId)
 
   const updatedRental = await Rental.findByIdAndUpdate(request.params.id, {
     $set: {
