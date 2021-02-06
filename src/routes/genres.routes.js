@@ -1,5 +1,7 @@
 const express = require('express')
 const { Genre, validateGenre } = require('../models/genres')
+const authentication = require('../middlewares/authentication')
+const admin = require('../middlewares/admin')
 
 const router = express.Router()
 
@@ -17,7 +19,7 @@ router.get('/:id', async (request, response) => {
   return response.send(findGenre)
 })
 
-router.post('/', async (request, response) => {
+router.post('/',authentication, async (request, response) => {
   
   const { error } = validateGenre(request.body)
   if(error) return response.status(400).send(error.details[0].message)
@@ -29,7 +31,7 @@ router.post('/', async (request, response) => {
   response.send(newGenre)
 })
 
-router.put('/:id', async (request, response) => {  
+router.put('/:id',authentication, async (request, response) => {  
   const { error } = validateGenre(request.body)
   if(error) return response.status(400).send(error.details[0].message)
 
@@ -42,7 +44,7 @@ router.put('/:id', async (request, response) => {
   return response.send(updatedGenre)
 })
 
-router.delete('/:id', async (request, response) => {  
+router.delete('/:id',[authentication, admin], async (request, response) => {  
   const removedGenre = await Genre.findByIdAndRemove(request.params.id)
   if(!removedGenre) return response.send('Genre not found!')
 
