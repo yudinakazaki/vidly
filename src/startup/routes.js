@@ -6,6 +6,7 @@ const movies = require('../routes/movies.routes')
 const rentals = require('../routes/rentals.routes')
 const users = require('../routes/users.routes')
 const auth = require('../routes/auth.routes')
+const returns = require('../routes/returns.routes')
 
 module.exports = function(app) {
   app.use(express.json())
@@ -17,4 +18,5 @@ module.exports = function(app) {
   app.use('/api/rentals', rentals)
   app.use('/api/users', users)
   app.use('/api/auth', auth)
+  app.use('/api/returns', returns)
 }

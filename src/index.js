@@ -1,11 +1,18 @@
 const express = require('express')
+const winston = require('winston')
 
 const app = express()
 
 require('./startup/logging')()
+require('./startup/config')()
 require('./startup/db')()
-require('./startup/config')
-require('./startup/validation')
+require('./startup/validation')()
 require('./startup/routes')(app)
 
-app.listen(3000, () => console.log('Server is running!!'))
+const port = process.env.PORT || 3000
+
+if(process.env.NODE_ENV !== 'test'){
+  app.listen(port, () => winston.info('Server is running!!'))
+}
+
+module.exports = app
